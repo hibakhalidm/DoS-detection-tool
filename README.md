@@ -2,7 +2,6 @@
 # Cyber Security - Dos Detection Tool (CMP3750M_Assessment_02)
 
 
-## Overview
 A denial of service (DoS) attack involves flooding a targeted device with a considerable amount of resources in the hopes of bringing a service to a halt and stop legitimate users from being able to access a service (CISA, 2009). The ‘DoS Identification Tool’ was created in Python and is used to identify these concerning amounts of resources being sent to the device it is being ran on. It was created and recommended to be used in Kali Linux for optimal results. 
 
 
