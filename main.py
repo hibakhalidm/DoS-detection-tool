@@ -1,5 +1,7 @@
 import socket
 import struct
+import npcap
+import winpcap
 from datetime import datetime
 import tkinter as tk
 import tkinter.font as tkFont
@@ -14,7 +16,9 @@ def DoSDetection():
     dict = {}  # Empty dict
 
     # Open text file + output the data/time of current compilation
-    file_txt = open("dos-output.txt", 'a')
+    filename = os.path.join(os.path.dirname(__file__), "dos-output.txt")
+    file_txt = open(filename, 'a')
+
 
     print("Running detection...")  # Report to terminal to ensure somethings happening
     running = "Running detection..."
@@ -25,13 +29,13 @@ def DoSDetection():
 
     # Minimum number of packets required to be flagged as a DoS attack
     packets_req = 1000
-    packets_req_stop = packets_req + 2  # Ensures line only printed once
+    #packets_req_stop = packets_req + 2  # Ensures line only printed once
 
     while True:
-        pkt = s.recvfrom(2048)
-        ipheader = pkt[0][14:34]
-        ip_hdr = struct.unpack("!8sB3s4s4s", ipheader)
-        IP = socket.inet_ntoa(ip_hdr[3])
+        pkt = s.recvfrom(2048) # This line receives a packet from the network with 2048 byte in the  one go
+        ipheader = pkt[0][14:34] #This extracts the IP header from the packet.
+        ip_hdr = struct.unpack("!8sB3s4s4s", ipheader) #used to parse the binary data in ipheader
+        IP = socket.inet_ntoa(ip_hdr[3]) #This converts the 4-byte source IP address to string format
 
         print("Source IP", IP)
 
@@ -40,7 +44,7 @@ def DoSDetection():
             new_value = "Packet received from: " + str(IP) + "\n Count: " + str(dict[IP])
             pcount.configure(text=new_value)
 
-            if (dict[IP] > packets_req) and (dict[IP] < packets_req_stop):
+            if (dict[IP] > packets_req): #and (dict[IP] < packets_req_stop)
                 time = str(datetime.now().strftime("Current time of compilation: %Y-%m-%d %H:%M:%S"))
                 file_txt.writelines(time)
                 file_txt.writelines("\n")
@@ -81,22 +85,27 @@ def stop_thread():
     global stop
     stop = 1
     print("Stopping detection...")
-    running = "Stopping detection, please wait..."
-    progress.configure(text=running)
+    progress.configure(text="Stopping detection, please wait...")
 
 
 # Open file and output results to text widget
 def refresh():
-    configfile.delete("1.0", "end")  # Clear the text widget
+    configfile.delete("1.0", "end")
     filename = "dos-output.txt"
 
-    # Check if anything exists in the file
-    if (os.stat(filename).st_size == 0) is True:
-        configfile.insert(tk.END, "No data currently! Run the DoS Detection Tool to gather data.")
-    else:
-        with open(filename, 'r') as f:
-            configfile.insert(tk.INSERT, f.read())  # Populate widget with contents of text file
 
+    if not os.path.isfile(filename):
+        configfile.insert(tk.END, "File not found! Ensure the DoS Detection Tool has been run.")
+        return
+
+    try:
+        if os.stat(filename).st_size == 0:
+            configfile.insert(tk.END, "No data currently! Run the DoS Detection Tool to gather data.")
+        else:
+            with open(filename, 'r') as f:
+                configfile.insert(tk.INSERT, f.read())
+    except Exception as e:
+         configfile.insert(tk.END, f"An error occurred: {e}")
 
 # Create tkinter window
 window = tk.Tk()
@@ -138,7 +147,7 @@ S.config(command=configfile.yview, bg='#646464', troughcolor='#282828', highligh
 configfile.config(yscrollcommand=S.set)
 
 # Ensure the current contents of the text file are displayed on first run through
-filename = "dos-output.txt"
+filename = filename = os.path.join(os.path.dirname(__file__), "dos-output.txt")
 if (os.stat(filename).st_size == 0) is True:
     configfile.insert(tk.END, "No data currently! Run the DoS Detection Tool to gather data.")
 else:
