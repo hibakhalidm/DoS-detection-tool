@@ -139,6 +139,7 @@ configfile.config(yscrollcommand=S.set)
 
 # Ensure the current contents of the text file are displayed on first run through
 filename = "dos-output.txt"
+
 if (os.stat(filename).st_size == 0) is True:
     configfile.insert(tk.END, "No data currently! Run the DoS Detection Tool to gather data.")
 else:
