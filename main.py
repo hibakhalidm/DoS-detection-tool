@@ -2,9 +2,15 @@ import socket
 import struct
 from datetime import datetime
 import tkinter as tk
+#Y'll guys consider using hese libraries for GUI PyQt, PySide or Kivy; tkinter is proven to have low resolution
 import tkinter.font as tkFont
 from threading import Thread
 import os
+import ctypes
+
+# Set the DPI awareness to SYSTEM_DPI for resolution purposes
+ctypes.windll.shcore.SetProcessDpiAwareness(1)
+
 
 
 def DoSDetection():
